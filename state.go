@@ -6,6 +6,7 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+// Represents the game state.
 type State struct {
 	snake  *Snake
 	food   *Food
@@ -13,7 +14,8 @@ type State struct {
 	score  int
 }
 
-func InitState() *State {
+// Create a new state.
+func NewState() *State {
 	segmentRadius := (SegmentSize / 2)
 	windowCenterX := WindowWidth / 2
 	windowCenterY := WindowHeight / 2
@@ -37,8 +39,15 @@ func InitState() *State {
 	return &state
 }
 
-func (state *State) Loop() {
-	state.HandleInput()
+// Draw the state entities.
+func (state *State) Draw() {
+	state.snake.Draw()
+	state.food.Draw()
+}
+
+// Run one cycle of game logic.
+func (state *State) RunCycle() {
+	state.AcceptInput()
 	if state.food == nil {
 		GenerateFood(state)
 	}
@@ -49,6 +58,7 @@ func (state *State) Loop() {
 	}
 }
 
+// Generate a new food at a random location on screen.
 func GenerateFood(state *State) {
 	for {
 		x := rand.IntN((state.border.x2-state.border.x1)/SegmentSize)*SegmentSize + state.border.x1
@@ -60,11 +70,13 @@ func GenerateFood(state *State) {
 	}
 }
 
+// Check collision between entities.
 func Collision(a Entity, b Entity) bool {
 	return a.GetX() == b.GetX() && a.GetY() == b.GetY()
 }
 
-func (state *State) HandleInput() {
+// Get input and change snake direction accordingly.
+func (state *State) AcceptInput() {
 	head := state.snake.head
 	if rl.IsKeyPressed(rl.KeyUp) && head.dirY == 0 {
 		head.dirX = 0

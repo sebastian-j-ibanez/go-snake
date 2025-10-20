@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -16,15 +18,19 @@ func main() {
 
 	rl.SetTargetFPS(144)
 
-	state := InitState()
+	ticker := time.NewTicker(time.Millisecond * 100)
+
+	state := NewState()
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.RayWhite)
-		DrawBorder(state.border)
 
-		state.Loop()
-		state.DrawState()
+		select {
+		case <-ticker.C:
+			state.RunCycle()
+		}
+		state.Draw()
 
 		rl.EndDrawing()
 	}

@@ -1,12 +1,34 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
 
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+// Color of a segment entity.
+var SegmentColor = rl.NewColor(0, 173, 216, 255)
+
+// Color of a food entity.
+var FoodColor = rl.NewColor(255, 117, 20, 255)
+
+// Type of entity that can be drawn.
+type Drawable interface {
+	Draw()
+}
+
+type Entity interface {
+	GetX() int
+	GetY() int
+}
+
+// Snake
 type Snake struct {
 	length int
 	head   *Segment
 }
 
+// Create a new snake.
 func NewSnake(x int, y int, dirX int, dirY int) Snake {
 	return Snake{
 		length: 1,
@@ -14,14 +36,22 @@ func NewSnake(x int, y int, dirX int, dirY int) Snake {
 	}
 }
 
+// Draw a snake.
+func (s *Snake) Draw() {
+	for current := s.head; current != nil; current = current.next {
+		current.Draw()
+	}
+}
+
+// Increment the snakes position.
 func (s *Snake) Move() {
 	if s == nil || s.head == nil {
 		panic("snake/snake head is uninitialized")
 	}
 
 	for current := s.head; current != nil; current = current.next {
-		current.x += current.dirX
-		current.y += current.dirY
+		current.x += current.dirX * SegmentSize
+		current.y += current.dirY * SegmentSize
 		if current.next != nil {
 			current.dirX = current.next.dirX
 			current.dirY = current.next.dirY
@@ -29,6 +59,7 @@ func (s *Snake) Move() {
 	}
 }
 
+// Append a new segment to the back of the snake.
 func (s *Snake) Grow() {
 	tail := s.head.GetTail()
 	newTail := NewSegment(
@@ -41,11 +72,7 @@ func (s *Snake) Grow() {
 	s.length += 1
 }
 
-type Entity interface {
-	GetX() int
-	GetY() int
-}
-
+// Segment
 type Segment struct {
 	x      int
 	y      int
@@ -55,10 +82,22 @@ type Segment struct {
 	next   *Segment
 }
 
+func (s *Segment) Draw() {
+	rl.DrawRectangle(
+		int32(s.x),
+		int32(s.y),
+		SegmentSize,
+		SegmentSize,
+		SegmentColor,
+	)
+}
+
+// Create new segment.
 func NewSegment(x int, y int, dirX int, dirY int) *Segment {
 	return &Segment{x, y, dirX, dirY, nil, nil}
 }
 
+// Append new segment.
 func (s *Segment) Append(new *Segment) {
 	if s == nil || new == nil {
 		panic(fmt.Sprintf("unexpected nil pointer: appending %v to %v", new, s))
@@ -69,6 +108,7 @@ func (s *Segment) Append(new *Segment) {
 	new.before = tail
 }
 
+// Get reference to tail segment.
 func (s *Segment) GetTail() *Segment {
 	current := s
 	for current.next != nil {
@@ -77,6 +117,7 @@ func (s *Segment) GetTail() *Segment {
 	return current
 }
 
+// Check if snake is on a coordinate.
 func (snake *Snake) Occupies(x, y int) bool {
 	for current := snake.head; current != nil; current = current.next {
 		if current.x == x && current.y == y {
@@ -94,9 +135,17 @@ func (s *Segment) GetY() int {
 	return s.y
 }
 
+// Food
 type Food struct {
 	x int
 	y int
+}
+
+// Draw a food entity.
+func (f *Food) Draw() {
+	if f != nil {
+		rl.DrawRectangle(int32(f.x), int32(f.y), SegmentSize, SegmentSize, FoodColor)
+	}
 }
 
 func (f *Food) GetX() int {
@@ -107,11 +156,20 @@ func (f *Food) GetY() int {
 	return f.y
 }
 
+// Border
 type Border struct {
 	x1, y1 int
 	x2, y2 int
 }
 
+// Create a new border.
 func NewBorder(x1, y1, x2, y2 int) *Border {
 	return &Border{x1, y1, x2, y2}
+}
+
+// Draw a border.
+func (b *Border) Draw() {
+	width := b.x2 - b.x1
+	height := b.y2 - b.y1
+	rl.DrawRectangleLines(int32(b.x1), int32(b.y1), int32(width), int32(height), rl.Black)
 }
