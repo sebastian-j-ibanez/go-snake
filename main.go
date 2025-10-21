@@ -18,9 +18,11 @@ func main() {
 
 	rl.SetTargetFPS(144)
 
-	ticker := time.NewTicker(time.Millisecond * 100)
+	ticker := time.NewTicker(time.Millisecond * 350)
 
-	state := NewState()
+	engine := NewEngine()
+	go engine.ProcessInput()
+
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 
@@ -28,9 +30,9 @@ func main() {
 
 		select {
 		case <-ticker.C:
-			state.RunCycle()
+			engine.RunCycle()
 		}
-		state.Draw()
+		engine.Draw()
 
 		rl.EndDrawing()
 	}
