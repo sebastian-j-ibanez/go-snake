@@ -12,21 +12,20 @@ type Engine struct {
 	food   *Food
 	border *Border
 	score  int
-	input  chan Direction
 }
 
 // Initialize a new game engine.
 func NewEngine() *Engine {
 	// Window & Snake
-	segmentRadius := (SegmentSize / 2)
+	borderWidth := 20
 	windowCenterX := WindowWidth / 2
 	windowCenterY := WindowHeight / 2
-	startingX := windowCenterX - segmentRadius
-	startingY := windowCenterY - segmentRadius
+	// Align snake starting position to the same grid as food
+	startingX := borderWidth + ((windowCenterX - borderWidth) / SegmentSize * SegmentSize)
+	startingY := borderWidth + ((windowCenterY - borderWidth) / SegmentSize * SegmentSize)
 	snake := NewSnake(startingX, startingY, 0, 0)
 
 	// Border
-	borderWidth := 20
 	topBorderY := borderWidth
 	bottomBorderY := WindowHeight - borderWidth
 	leftBorderX := borderWidth
@@ -34,14 +33,12 @@ func NewEngine() *Engine {
 	border := NewBorder(leftBorderX, topBorderY, rightBorderX, bottomBorderY)
 
 	// Input channel.
-	input := make(chan Direction)
 
 	engine := Engine{
 		&snake,
 		nil,
 		border,
 		0,
-		input,
 	}
 	return &engine
 }
@@ -64,27 +61,21 @@ func (engine *Engine) RunCycle() {
 	}
 }
 
-// Represents a direction given an x and y.
-type Direction struct {
-	X int
-	Y int
-}
-
 // Get input and change snake direction accordingly.
 func (s *Engine) ProcessInput() {
 	for {
 		x := &s.snake.head.dirX
 		y := &s.snake.head.dirY
-		if rl.IsKeyPressed(rl.KeyUp) && *y == 0 {
+		if rl.IsKeyPressed(rl.KeyUp) {
 			*x = 0
 			*y = -1
-		} else if rl.IsKeyPressed(rl.KeyDown) && *y == 0 {
+		} else if rl.IsKeyPressed(rl.KeyDown) {
 			*x = 0
 			*y = 1
-		} else if rl.IsKeyPressed(rl.KeyLeft) && *x == 0 {
+		} else if rl.IsKeyPressed(rl.KeyLeft) {
 			*x = -1
 			*y = 0
-		} else if rl.IsKeyPressed(rl.KeyRight) && *x == 0 {
+		} else if rl.IsKeyPressed(rl.KeyRight) {
 			*x = 1
 			*y = 0
 		}

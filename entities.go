@@ -49,13 +49,22 @@ func (s *Snake) Move() {
 		panic("snake/snake head is uninitialized")
 	}
 
+	type direction struct{ x, y int }
+	var oldDirections []direction
+	for current := s.head; current != nil; current = current.next {
+		oldDirections = append(oldDirections, direction{current.dirX, current.dirY})
+	}
+
+	i := 0
 	for current := s.head; current != nil; current = current.next {
 		current.x += current.dirX * SegmentSize
 		current.y += current.dirY * SegmentSize
-		if current.next != nil {
-			current.dirX = current.next.dirX
-			current.dirY = current.next.dirY
+
+		if i > 0 {
+			current.dirX = oldDirections[i-1].x
+			current.dirY = oldDirections[i-1].y
 		}
+		i++
 	}
 }
 
