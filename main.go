@@ -7,18 +7,20 @@ import (
 )
 
 const (
-	WindowWidth  = 1500
-	WindowHeight = 1000
+	WindowWidth  = 1020
+	WindowHeight = 670
 	SegmentSize  = 50
+	BannerHeight = 50
 )
 
 func main() {
+	rl.SetConfigFlags(rl.FlagWindowHighdpi)
 	rl.InitWindow(int32(WindowWidth), int32(WindowHeight), "Go Snake")
 	defer rl.CloseWindow()
 
-	rl.SetTargetFPS(144)
+	rl.SetTargetFPS(60)
 
-	ticker := time.NewTicker(time.Millisecond * 350)
+	ticker := time.NewTicker(time.Millisecond * 200)
 
 	engine := NewEngine()
 	go engine.ProcessInput()
@@ -28,6 +30,7 @@ func main() {
 
 		rl.ClearBackground(rl.RayWhite)
 
+		engine.Draw()
 		select {
 		case <-ticker.C:
 			engine.RunCycle()
