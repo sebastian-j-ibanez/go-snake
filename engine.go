@@ -12,6 +12,7 @@ type Engine struct {
 	food   *Food
 	border *Border
 	score  int
+	scoreBoard ScoreBoard
 }
 
 // Initialize a new game engine.
@@ -32,13 +33,22 @@ func NewEngine() *Engine {
 	rightBorderX := WindowWidth - borderWidth
 	border := NewBorder(leftBorderX, topBorderY, rightBorderX, bottomBorderY)
 
-	// Input channel.
-
+	// Score board
+	scoreBoard := ScoreBoard{
+		originX: 0,
+		originY: 0,
+		width: WindowWidth,
+		height: BannerHeight,
+		scoreX: windowCenterX,
+		scoreY: 5,
+	}
+	
 	engine := Engine{
 		&snake,
 		nil,
 		border,
 		0,
+		scoreBoard,
 	}
 	return &engine
 }
@@ -48,6 +58,7 @@ func (engine *Engine) Draw() {
 	engine.snake.Draw()
 	engine.food.Draw()
 	engine.border.Draw()
+	engine.scoreBoard.Draw(engine.score)
 }
 
 // Run one cycle of game logic.
@@ -59,6 +70,7 @@ func (engine *Engine) RunCycle() {
 	if Collision(engine.snake.head, engine.food) {
 		engine.snake.Grow()
 		engine.food = nil
+		engine.score += 1
 	}
 }
 
@@ -99,3 +111,4 @@ func GenerateFood(engine *Engine) {
 func Collision(a Entity, b Entity) bool {
 	return a.GetX() == b.GetX() && a.GetY() == b.GetY()
 }
+

@@ -26,17 +26,14 @@ func main() {
 	go engine.ProcessInput()
 
 	for !rl.WindowShouldClose() {
-		rl.BeginDrawing()
-
-		rl.ClearBackground(rl.RayWhite)
-
-		engine.Draw()
 		select {
 		case <-ticker.C:
 			engine.RunCycle()
 		}
-		engine.Draw()
 
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.DarkGray)
+		engine.Draw()
 		rl.EndDrawing()
 	}
 }
