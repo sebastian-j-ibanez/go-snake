@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand/v2"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -14,21 +13,21 @@ type Engine struct {
 	border     *Border
 	score      int
 	scoreBoard ScoreBoard
+	run        bool
 }
 
 // Initialize a new game engine.
 func NewEngine() *Engine {
 	// Window & Snake
-	borderWidth := 10
 	windowCenterX := FullWindowWidth / 2
-	windowCenterY := (FullWindowHeight - ScoreBoredHeight) / 2
+	windowCenterY := (FullWindowHeight - ScoreBoardHeight) / 2
 	// Align snake starting position to the same grid as food
-	startingX := borderWidth + ((windowCenterX - borderWidth) / SegmentSize * SegmentSize)
-	startingY := borderWidth + ((windowCenterY - borderWidth) / SegmentSize * SegmentSize) // Border
-	topBorderY := borderWidth + ScoreBoredHeight
-	bottomBorderY := FullWindowHeight - borderWidth
-	leftBorderX := borderWidth
-	rightBorderX := FullWindowWidth - borderWidth
+	startingX := BorderWidth + ((windowCenterX - BorderWidth) / SegmentSize * SegmentSize)
+	startingY := BorderWidth + ((windowCenterY - BorderWidth) / SegmentSize * SegmentSize) // Border
+	topBorderY := BorderWidth + ScoreBoardHeight
+	bottomBorderY := FullWindowHeight - BorderWidth
+	leftBorderX := BorderWidth
+	rightBorderX := FullWindowWidth - BorderWidth
 	border := NewBorder(leftBorderX, topBorderY, rightBorderX, bottomBorderY)
 
 	// Score board
@@ -36,9 +35,9 @@ func NewEngine() *Engine {
 		originX: 0,
 		originY: 0,
 		width:   FullWindowWidth,
-		height:  ScoreBoredHeight,
-		scoreX:  windowCenterX,
-		scoreY:  5,
+		height:  ScoreBoardHeight,
+		scoreX:  100,
+		scoreY:  20,
 	}
 
 	engine := Engine{
@@ -47,6 +46,7 @@ func NewEngine() *Engine {
 		border,
 		0,
 		scoreBoard,
+		true,
 	}
 	return &engine
 }
@@ -57,6 +57,9 @@ func (engine *Engine) Draw() {
 	engine.food.Draw()
 	engine.border.Draw()
 	engine.scoreBoard.Draw(engine.score)
+	if !engine.run {
+		engine.DrawGameOver()
+	}
 }
 
 // Run one cycle of game logic.
@@ -69,16 +72,20 @@ func (engine *Engine) RunCycle() {
 		engine.snake.Grow()
 		engine.food = nil
 		engine.score += 1
-	} else if BorderCollision(engine.border, engine.snake.head) {
-		engine.PrintGameOver()
+	} else if IsOutOfBounds(engine.border, engine.snake.head) {
+		engine.run = false
 	}
 }
 
 // Get input and change snake direction accordingly.
-func (s *Engine) ProcessInput() {
+func (engine *Engine) ProcessInput() {
 	for {
-		x := &s.snake.head.dirX
-		y := &s.snake.head.dirY
+		if !engine.run {
+			return
+		}
+
+		x := &engine.snake.head.dirX
+		y := &engine.snake.head.dirY
 		if rl.IsKeyPressed(rl.KeyUp) && *y == 0 {
 			*x = 0
 			*y = -1
@@ -112,16 +119,17 @@ func Collision(a Entity, b Entity) bool {
 	return a.GetX() == b.GetX() && a.GetY() == b.GetY()
 }
 
-// Check collision between entity and border.
-func BorderCollision(border *Border, a Entity) bool {
-	inXBounds := a.GetX() > border.x1 && a.GetX() < border.x2
-	inYBounds := a.GetY() > border.y1 && a.GetY() < border.y2
-	return !inXBounds && !inYBounds
+// Check if entity is out of bounds.
+func IsOutOfBounds(border *Border, a Entity) bool {
+	outOfXBounds := a.GetX() < border.x1 || a.GetX() >= border.x2
+	outOfYBounds := a.GetY() < border.y1 || a.GetY() > border.y2-SegmentSize
+	return outOfXBounds || outOfYBounds
 }
 
-// Print game over message.
-func (engine *Engine) PrintGameOver() {
-	text := fmt.Sprintf("Game Over\nScore: %d", engine.score)
-	rl.DrawRectangle(int32(engine.scoreBoard.scoreX+20), int32(engine.scoreBoard.scoreY+20), int32(engine.scoreBoard.width), int32(engine.scoreBoard.height), rl.DarkGray)
-	rl.DrawText(text, int32(engine.scoreBoard.originX+20), int32(engine.scoreBoard.originY+20), 40, SegmentColor)
+// Draw game over message inside the render loop.
+func (engine *Engine) DrawGameOver() {
+	text := "Game Over"
+	textWidth := rl.MeasureText(text, FontSize)
+	msgX := (FullWindowWidth - BorderWidth) - (textWidth + BorderWidth)
+	rl.DrawText(text, int32(msgX), int32(engine.scoreBoard.scoreY), FontSize, SegmentColor)
 }
