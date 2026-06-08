@@ -72,9 +72,19 @@ func (engine *Engine) RunCycle() {
 		engine.snake.Grow()
 		engine.food = nil
 		engine.score += 1
+	} else if engine.snake.head.next != nil && engine.SnakeSelfCollision(engine.snake.head.next) {
+		engine.run = false
 	} else if IsOutOfBounds(engine.border, engine.snake.head) {
 		engine.run = false
 	}
+}
+
+func (engine *Engine) SnakeSelfCollision(node *Segment) bool {
+	if node != nil && node.next != nil && engine.SnakeSelfCollision(node.next) {
+		return true
+	}
+
+	return Collision(engine.snake.head, node)
 }
 
 // Get input and change snake direction accordingly.
