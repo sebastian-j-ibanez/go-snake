@@ -187,17 +187,14 @@ func (b *Border) Draw() {
 // Represents the coordinates used to draw the score board.
 type ScoreBoard struct {
 	originX, originY int
-	width, height int
-	scoreX, scoreY int
+	width, height    int
+	scoreX, scoreY   int
 }
-
 
 // Draw the score board given a score value.
 func (s *ScoreBoard) Draw(score int) {
-	rectangle := rl.NewRectangle(float32(s.originX), float32(s.originY), float32(s.width), float32(s.height))
-	rl.DrawRectangleLinesEx(rectangle, 3, rl.White)
 	scoreText := fmt.Sprintf("Score: %d", score)
 	textWidth := int(rl.MeasureText(scoreText, 40))
 	centeredX := s.scoreX - textWidth/2
-	rl.DrawText(scoreText, int32(centeredX), int32(s.scoreY), 40, SegmentColor);
+	rl.DrawText(scoreText, int32(centeredX), int32(s.scoreY), 40, SegmentColor)
 }

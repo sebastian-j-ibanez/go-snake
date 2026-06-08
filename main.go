@@ -7,15 +7,15 @@ import (
 )
 
 const (
-	WindowWidth  = 1020
-	WindowHeight = 670
-	SegmentSize  = 50
-	BannerHeight = 50
+	FullWindowWidth  = 1020
+	FullWindowHeight = 670
+	SegmentSize      = 50
+	ScoreBoredHeight = 50
 )
 
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowHighdpi)
-	rl.InitWindow(int32(WindowWidth), int32(WindowHeight), "Go Snake")
+	rl.InitWindow(int32(FullWindowWidth), int32(FullWindowHeight), "Go Snake")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
